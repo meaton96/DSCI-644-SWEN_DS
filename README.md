@@ -32,7 +32,7 @@ This is a containerized version of the class environment (Spark + MySQL). It all
   
 
 ### Setup & Execution
-#### 1. Download the latest release (zip)
+#### 1. Download the latest release (zip) here: https://github.com/meaton96/DSCI-644-SWEN_DS/releases
 Extract to your git repo, or to an empty folder.
 
   
