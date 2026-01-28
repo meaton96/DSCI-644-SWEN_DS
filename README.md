@@ -45,9 +45,17 @@ Extract to your git repo, or to an empty folder.
 docker-compose up -d
 ```
 
-#### 3. Connect to container in VS Code
-connect to `_spark` container 
-navigate to the `/app/` folder
+#### 3. Connect via VS Code 
+
+To actually develop inside the Spark environment:
+
+1.  Open the project folder in **VS Code**.
+    
+2.  Click the **>< Remote Icon** (bottom-left corner) or press `F1` and type `Dev Containers: Attach to Running Container...`.
+    
+3.  Select the **`_spark`** container.
+    
+4.  Once the new window opens, go to **File > Open Folder** and select `/app/`.
 
 #### 4. Init the python environment
 
