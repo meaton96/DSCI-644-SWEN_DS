@@ -1,27 +1,43 @@
+import os
 from pyspark.sql import SparkSession
 
-# 1. Initialize Spark
+# Path to the driver inside the container
+jar_path = "/opt/spark/jars/mysql-connector-java.jar"
+
+print("\n" + "="*40)
+print("🔍 Testing MySQL Connection...")
+print("="*40)
+
+# 1. Physical Check
+if not os.path.exists(jar_path):
+    print(f"❌ ERROR: JAR file missing at {jar_path}")
+    print("Check your Dockerfile 'curl' command and ensure you used the -L flag.")
+    exit(1)
+
+# 2. Initialize Spark
+# We use both spark.jars and extraClassPath to ensure the JVM sees the driver
 spark = SparkSession.builder \
     .appName("TestConnection") \
-    .config("spark.jars", "/opt/spark/jars/mysql-connector-java.jar") \
+    .config("spark.jars", jar_path) \
+    .config("spark.driver.extraClassPath", jar_path) \
     .getOrCreate()
 
-# 2. Connection Details (Note the url uses 'db', not 'localhost')
 jdbc_url = "jdbc:mysql://db:3306/my_project_db"
-properties = {
-    "user": "user",
-    "password": "password",
-    "driver": "com.mysql.cj.jdbc.Driver"
-}
+jdbc_driver = "com.mysql.cj.jdbc.Driver"
 
-# 3. Try to read (This will fail gracefully if table doesn't exist, but proves connection)
 try:
-    print("Attempting to connect to MySQL...")
-    df = spark.read.jdbc(url=jdbc_url, table="test_table", properties=properties)
-    print("Connection successful!")
-except Exception as e:
-    # We expect an error because 'test_table' doesn't exist yet,
-    # but if the error mentions "Access denied" or "Communications link failure", then we have a problem.
-    print(f"Connection attempted! Error details (this is normal if table is missing): {e}")
+    # Get the JVM gateway and manually register the driver
+    jvm = spark._jvm
+    jvm.java.lang.Class.forName(jdbc_driver)
+    
+    # Attempt the connection
+    conn = jvm.java.sql.DriverManager.getConnection(jdbc_url, "user", "password")
+    
+    if not conn.isClosed():
+        print("✅ SUCCESS: Spark can communicate with the MySQL container!")
+        conn.close()
 
-spark.stop()
+except Exception as e:
+    print(f"❌ CONNECTION FAILED: {e}")
+finally:
+    spark.stop()
