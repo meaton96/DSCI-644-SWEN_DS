@@ -1,5 +1,5 @@
 
-# DSCI-644 Mac/Docker Environment Setup
+# DSCI-644 Docker Environment Setup
 
   
 
