@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # Service 1: The Database
+  db:
+    image: mysql:8.0
+    container_name: dsci644_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # Default for testing
+      MYSQL_DATABASE: my_project_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306" 
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Service 2: Your Spark Dev Environment
+  spark-app:
+    build: .
+    container_name: dsci644_spark
+    depends_on:
+      - db
+    volumes:
+      - .:/app # Syncs current folder to the container
+    environment:
+      # Tell Spark where the JDBC driver is (inside the container)
+      SPARK_CLASSPATH: /opt/spark/jars/mysql-connector-java.jar
+
+volumes:
+  db_data:
