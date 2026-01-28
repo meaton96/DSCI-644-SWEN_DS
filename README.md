@@ -31,7 +31,7 @@ This is a containerized version of the class environment (Spark + MySQL). It all
 
   
 
-### 🚀 Setup & Execution
+### Setup & Execution
 #### 1. Download the latest release (zip)
 Extract to your git repo, or to an empty folder.
 
@@ -66,3 +66,5 @@ pip install -r requirements.txt
 ```bash
 python test_db.py
 ```
+#### Expected Output:
+``✅ SUCCESS: Spark can communicate with the MySQL container!``
