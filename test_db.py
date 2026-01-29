@@ -1,43 +1,63 @@
 import os
 from pyspark.sql import SparkSession
 
-# Path to the driver inside the container
-jar_path = "/opt/spark/jars/mysql-connector-java.jar"
+# Path to the MySQL driver inside the container (Ensure this matches your Dockerfile filename)
+mysql_jar_path = "/opt/spark/jars/mysql-connector-j.jar"
 
-print("\n" + "="*40)
-print("🔍 Testing MySQL Connection...")
-print("="*40)
+# Maven coordinate for the MongoDB Spark Connector
+# This will be downloaded automatically by Spark when the session starts
+mongo_connector_package = "org.mongodb.spark:mongo-spark-connector_2.12:10.4.0"
 
-# 1. Physical Check
-if not os.path.exists(jar_path):
-    print(f"❌ ERROR: JAR file missing at {jar_path}")
-    print("Check your Dockerfile 'curl' command and ensure you used the -L flag.")
+print("\n" + "="*50)
+print("Initializing Multi-DB Connection Test...")
+print("="*50)
+
+# 1. Physical Check for MySQL JAR
+if not os.path.exists(mysql_jar_path):
+    print(f"ERROR: MySQL JAR file missing at {mysql_jar_path}")
     exit(1)
 
-# 2. Initialize Spark
-# We use both spark.jars and extraClassPath to ensure the JVM sees the driver
+# 2. Initialize Spark with both MySQL JAR and Mongo Maven Package
 spark = SparkSession.builder \
-    .appName("TestConnection") \
-    .config("spark.jars", jar_path) \
-    .config("spark.driver.extraClassPath", jar_path) \
+    .appName("MultiDBTest") \
+    .config("spark.jars", mysql_jar_path) \
+    .config("spark.driver.extraClassPath", mysql_jar_path) \
+    .config("spark.jars.packages", mongo_connector_package) \
+    .config("spark.mongodb.read.connection.uri", "mongodb://mongodb:27017/test_db.test_collection") \
+    .config("spark.mongodb.write.connection.uri", "mongodb://mongodb:27017/test_db.test_collection") \
     .getOrCreate()
 
-jdbc_url = "jdbc:mysql://db:3306/my_project_db"
+# --- TEST MYSQL ---
+print("\n🔍 Testing MySQL (JDBC)...")
+jdbc_url = "jdbc:mysql://db:3306/project1_db"
 jdbc_driver = "com.mysql.cj.jdbc.Driver"
 
 try:
-    # Get the JVM gateway and manually register the driver
+    # Use the JVM gateway to check the driver
     jvm = spark._jvm
     jvm.java.lang.Class.forName(jdbc_driver)
-    
-    # Attempt the connection
-    conn = jvm.java.sql.DriverManager.getConnection(jdbc_url, "user", "password")
+    conn = jvm.java.sql.DriverManager.getConnection(jdbc_url, "root", "rootpassword")
     
     if not conn.isClosed():
-        print("✅ SUCCESS: Spark can communicate with the MySQL container!")
+        print("✅ SUCCESS: Spark connected to MySQL!")
         conn.close()
-
 except Exception as e:
-    print(f"❌ CONNECTION FAILED: {e}")
-finally:
-    spark.stop()
+    print(f"❌ MYSQL FAILED: {e}")
+
+# --- TEST MONGODB ---
+print("\n🔍 Testing MongoDB...")
+try:
+    # We test Mongo by attempting to create a small DataFrame and writing it
+    test_df = spark.createDataFrame([("test_data", 1)], ["name", "id"])
+    test_df.write.format("mongodb").mode("overwrite").save()
+    
+    # Read it back to verify
+    read_df = spark.read.format("mongodb").load()
+    if read_df.count() > 0:
+        print("✅ SUCCESS: Spark connected to MongoDB and wrote/read data!")
+except Exception as e:
+    print(f"❌ MONGODB FAILED: {e}")
+    print("Tip: Make sure the 'mongodb' service is running in docker-compose.")
+
+print("\n" + "="*50)
+spark.stop()
