@@ -57,20 +57,8 @@ To actually develop inside the Spark environment:
     
 4.  Once the new window opens, go to **File > Open Folder** and select `/app/`.
 
-#### 4. Init the python environment
 
-```bash
-# Create the environment
-python -m venv .venv
-
-# select it (unix command from inside container is same on windows and mac)
-source .venv/bin/activate
-
-# install dependencies
-pip install -r requirements.txt
-```
-
-#### 5. Verify connection
+#### 4. Verify connection
 ```bash
 python test_db.py
 ```
