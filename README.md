@@ -11,6 +11,7 @@ This is a containerized version of the class environment (Spark + MySQL). It all
 2. `pyspark:3.5.0`
 3. `java:17`
 4. `JDBC Driver:8.0.33`
+5. `mongo:latest`
   
 
   

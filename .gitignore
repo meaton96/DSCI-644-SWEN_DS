@@ -179,3 +179,20 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Docker / Databases
+db_data/
+mongo_data/
+.env
+
+# Spark/Java
+*.jar
+target/
+.bsp/
+
+
+project-1-part-1/
