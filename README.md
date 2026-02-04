@@ -1,4 +1,5 @@
 
+
 # DSCI-644 Docker Environment Setup
 
   
@@ -64,8 +65,24 @@ To actually develop inside the Spark environment:
 python test_db.py
 ```
 #### Expected Output:
-``🔍 Testing MySQL (JDBC)...
+🔍 Testing MySQL (JDBC)...
 ✅ SUCCESS: Spark connected to MySQL!
 
 🔍 Testing MongoDB...
-✅ SUCCESS: Spark connected to MongoDB and wrote/read data!``
+✅ SUCCESS: Spark connected to MongoDB and wrote/read data!
+
+#### 5. You can now clone any project repo/files into your container 
+
+###  IMPORTANT
+- When setting up the .env file, or attempting to access the database, the server is not running on localhost
+
+ Replace references to [**localhost**] with the name of the spark container ie. [**dsci644_mysql**] or [**dsci644_mongo**]
+
+- You no longer need a python virtual environment. The global environment of the container serves this purpose. (Install pip packages globally)
+
+- To change the database user information, update the **docker-compose.yaml**
+
+- If you want/need to access the databases via command line use:
+`docker exec -it dsci644_mysql mysql -u [USER] -p` for mysql or
+`docker exec -it dsci644_mongo mongosh` for mongodb cli
+
