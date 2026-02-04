@@ -43,7 +43,7 @@ Extract to your git repo, or to an empty folder.
  Navigate to that folder and run:
 
 ```powershell
-docker-compose up -d
+docker-compose up --build
 ```
 
 #### 3. Connect via VS Code 
