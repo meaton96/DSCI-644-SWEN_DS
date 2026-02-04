@@ -64,4 +64,8 @@ To actually develop inside the Spark environment:
 python test_db.py
 ```
 #### Expected Output:
-``✅ SUCCESS: Spark can communicate with the MySQL container!``
+``🔍 Testing MySQL (JDBC)...
+✅ SUCCESS: Spark connected to MySQL!
+
+🔍 Testing MongoDB...
+✅ SUCCESS: Spark connected to MongoDB and wrote/read data!``
